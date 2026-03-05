@@ -11,7 +11,6 @@ jobs:
     timeout-minutes: 15
 
     env:
-      # Secrets and environment variables for Python
       EMAIL: ${{ secrets.EMAIL }}
       PASSWORD: ${{ secrets.PASSWORD }}
       PROPOSAL_ID: "344878"
@@ -32,34 +31,13 @@ jobs:
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
+          python -m pip install playwright google-api-python-client google-auth-httplib2 google-auth-oauthlib
           python -m pip install -r requirements.txt
 
       - name: Install Playwright Browsers
         uses: microsoft/playwright-github-action@v1
         with:
           browser: chromium
-
-      - name: Debug Environment Variables
-        run: |
-          echo "Checking critical environment variables..."
-          if [ -z "$GOOGLE_SERVICE_ACCOUNT" ]; then
-            echo "❌ GOOGLE_SERVICE_ACCOUNT is missing!"
-            exit 1
-          else
-            echo "✅ GOOGLE_SERVICE_ACCOUNT is set"
-          fi
-          if [ -z "$SPREADSHEET_ID" ]; then
-            echo "❌ SPREADSHEET_ID is missing!"
-            exit 1
-          else
-            echo "✅ SPREADSHEET_ID is set"
-          fi
-          if [ -z "$DRIVE_FOLDER_ID" ]; then
-            echo "❌ DRIVE_FOLDER_ID is missing!"
-            exit 1
-          else
-            echo "✅ DRIVE_FOLDER_ID is set"
-          fi
 
       - name: Run Automation
         run: python main.py
