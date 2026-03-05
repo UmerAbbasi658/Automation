@@ -1,0 +1,39 @@
+name: Robin Automation
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install All Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install playwright google-api-python-client google-auth-httplib2 google-auth-oauthlib
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Run Automation
+        env:
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          PROPOSAL_ID: "344878"
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python main.py
