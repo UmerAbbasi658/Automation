@@ -1,10 +1,9 @@
 name: Offerte Automation
 
-# Triggers
 on:
-  workflow_dispatch:     # Manual trigger
+  workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'  # Every hour (adjust as needed)
+    - cron: '0 * * * *'  # every hour
 
 jobs:
   run-offerte:
@@ -30,5 +29,6 @@ jobs:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
-        run: |
-          python main.py
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: python main.py

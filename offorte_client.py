@@ -1,17 +1,16 @@
 import json
 from playwright.sync_api import sync_playwright
 from config import EMAIL, PASSWORD, BASE_URL
-print("EMAIL:", EMAIL)
-print("PASSWORD:", PASSWORD)
 
 class OfforteAutomation:
-
     def __init__(self, proposal_id, page_id):
         self.proposal_id = proposal_id
         self.page_id = page_id
         self.proposal_data = {}
 
     def login(self, page):
+        if not EMAIL or not PASSWORD:
+            raise ValueError("EMAIL or PASSWORD is not set in .env")
         page.goto(BASE_URL)
         page.fill("#user_email", EMAIL)
         page.fill("#user_pass", PASSWORD)
@@ -33,11 +32,10 @@ class OfforteAutomation:
 
     def open_proposal(self, page):
         viewer_url = f"{BASE_URL}/viewer/{self.proposal_id}/{self.page_id}"
-        page.goto(viewer_url, wait_until="networkidle", timeout=60000)  # Reduced timeout
-        # Removed long sleep to speed up headless execution
+        page.goto(viewer_url, wait_until="networkidle", timeout=60000)
 
     def _structure_data(self, data):
-        structured = {
+        return {
             "metadata": {
                 "proposal_id": self.proposal_id,
                 "name": data.get("details", {}).get("name"),
@@ -50,26 +48,20 @@ class OfforteAutomation:
             "form_fields": data.get("formfields", []),
             "pages": data.get("document", {}).get("pages", [])
         }
-        return structured
 
     def run(self):
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)  # HEADLESS mode for GitHub Actions
+            browser = p.chromium.launch(headless=True)
             context = browser.new_context()
             page = context.new_page()
-
             self.login(page)
             self.capture_api_response(page)
-
             try:
                 self.open_proposal(page)
             except Exception as e:
                 page.screenshot(path=f"error_{self.page_id}.png")
                 raise e
-
             browser.close()
-
         if not self.proposal_data:
             raise Exception(f"Proposal data not captured for page {self.page_id}")
-
         return self.proposal_data
