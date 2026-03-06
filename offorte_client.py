@@ -1,6 +1,8 @@
 import json
 from playwright.sync_api import sync_playwright
 from config import EMAIL, PASSWORD, BASE_URL
+print("EMAIL:", EMAIL)
+print("PASSWORD:", PASSWORD)
 
 class OfforteAutomation:
 
