@@ -30,9 +30,9 @@ class OfforteAutomation:
         page.on("response", handle_response)
 
     def open_proposal(self, page):
-        viewer_url = f"{BASE_URL}/viewer/{self.proposal_id}/{self.page_id}/"
-        page.goto(viewer_url)
-        page.wait_for_timeout(10000)
+        viewer_url = f"{BASE_URL}/viewer/{self.proposal_id}/{self.page_id}"
+        page.goto(viewer_url, wait_until="networkidle", timeout=60000)  # Reduced timeout
+        # Removed long sleep to speed up headless execution
 
     def _structure_data(self, data):
         structured = {
@@ -52,15 +52,22 @@ class OfforteAutomation:
 
     def run(self):
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=True)  # HEADLESS mode for GitHub Actions
             context = browser.new_context()
             page = context.new_page()
+
             self.login(page)
             self.capture_api_response(page)
-            self.open_proposal(page)
+
+            try:
+                self.open_proposal(page)
+            except Exception as e:
+                page.screenshot(path=f"error_{self.page_id}.png")
+                raise e
+
             browser.close()
 
         if not self.proposal_data:
-            raise Exception("Proposal data not captured")
+            raise Exception(f"Proposal data not captured for page {self.page_id}")
 
         return self.proposal_data

@@ -1,15 +1,14 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import json
+import requests
 from offorte_client import OfforteAutomation
-from google_service import (
-    get_pending_rows,
-    mark_row_done,
-    upload_json_to_drive
-)
+from google_service import get_pending_rows, mark_row_done
 
 PROPOSAL_ID = "344878"
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
+WEBHOOK_URL = os.getenv("ZAPIER_WEBHOOK_URL")
 
 def main():
     pending_rows = get_pending_rows(SPREADSHEET_ID, "Sheet1!A:B")
@@ -28,19 +27,18 @@ def main():
             automation = OfforteAutomation(PROPOSAL_ID, page_id)
             proposal_data = automation.run()
 
-            file_name = f"{page_id}.json"
-            file_path = f"./{file_name}"
+            # Send the data to Zapier webhook
+            response = requests.post(WEBHOOK_URL, json=proposal_data)
+            if response.status_code == 200 or response.status_code == 201:
+                print(f"✅ Sent Page {page_id} data to webhook")
 
-            with open(file_path, "w") as f:
-                json.dump(proposal_data, f, indent=4)
-
-            upload_json_to_drive(file_path, file_name, DRIVE_FOLDER_ID)
-            mark_row_done(SPREADSHEET_ID, row_number)
-
-            print(f"✅ Completed: {page_id}")
+                # Mark row as done in Google Sheet
+                mark_row_done(SPREADSHEET_ID, row_number)
+            else:
+                print(f"❌ Failed to send Page {page_id} data. Status: {response.status_code}, Response: {response.text}")
 
         except Exception as e:
-            print(f"❌ Failed for {page_id}: {str(e)}")
+            print(f"❌ Failed for Page {page_id}: {str(e)}")
 
 if __name__ == "__main__":
     main()

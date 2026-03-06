@@ -1,43 +1,34 @@
-name: Robin Automation
+name: Offerte Automation
 
+# Triggers
 on:
+  workflow_dispatch:     # Manual trigger
   schedule:
-    - cron: "*/10 * * * *"
-  workflow_dispatch:
+    - cron: '0 * * * *'  # Every hour (adjust as needed)
 
 jobs:
-  run-automation:
+  run-offerte:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    env:
-      EMAIL: ${{ secrets.EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      PROPOSAL_ID: "344878"
-      SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-      DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
-      GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-      PYTHONPATH: ${{ github.workspace }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install Python Dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install playwright google-api-python-client google-auth-httplib2 google-auth-oauthlib
-          python -m pip install -r requirements.txt
+          pip install -r requirements.txt
+          playwright install chromium
 
-      - name: Install Playwright Browsers
-        uses: microsoft/playwright-github-action@v1
-        with:
-          browser: chromium
-
-      - name: Run Automation
-        run: python main.py
+      - name: Run Offerte automation
+        env:
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+        run: |
+          python main.py
