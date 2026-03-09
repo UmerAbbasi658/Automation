@@ -2,8 +2,6 @@ name: Offerte Automation
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *'  # every hour
 
 jobs:
   run-offerte:
