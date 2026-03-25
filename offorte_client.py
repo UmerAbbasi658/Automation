@@ -1,6 +1,6 @@
 import json
 from playwright.sync_api import sync_playwright
-from config import EMAIL, PASSWORD, BASE_URL
+from credentials import EMAIL, PASSWORD, BASE_URL  # using credentials.py
 
 class OfforteAutomation:
     def __init__(self, proposal_id, page_id):
@@ -31,7 +31,8 @@ class OfforteAutomation:
         page.on("response", handle_response)
 
     def open_proposal(self, page):
-        viewer_url = f"{BASE_URL}/viewer/{self.proposal_id}/{self.page_id}"
+        # Updated URL format for Offorte viewer
+        viewer_url = f"{BASE_URL}/viewer/{self.proposal_id}"
         page.goto(viewer_url, wait_until="networkidle", timeout=60000)
 
     def _structure_data(self, data):
