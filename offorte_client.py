@@ -1,6 +1,6 @@
 import json
 from playwright.sync_api import sync_playwright
-from credentials import EMAIL, PASSWORD, BASE_URL  # using credentials.py
+from config import EMAIL, PASSWORD, BASE_URL  # using credentials.py
 
 class OfforteAutomation:
     def __init__(self, proposal_id, page_id):
