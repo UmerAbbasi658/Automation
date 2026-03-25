@@ -3,7 +3,7 @@ import os
 import requests
 from offorte_client import OfforteAutomation
 from google_service import get_pending_rows, mark_row_done
-from credentials import get_proposal_url  # optional helper, not required
+from config import get_proposal_url  # optional helper, not required
 
 # Load environment variables
 load_dotenv()
